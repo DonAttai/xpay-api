@@ -1,6 +1,18 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Transaction } from 'src/transactions/transaction.entity';
+import { Wallet } from 'src/wallet/wallet.entities';
+import { Exclude } from 'class-transformer';
 
-@Entity()
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -9,11 +21,32 @@ export class User {
   email: string;
 
   @Column()
-  first_name: string;
+  firstName: string;
 
   @Column()
-  last_name: string;
+  lastName: string;
 
   @Column()
+  @Exclude()
   password: string;
+
+  @Column({ name: 'active', default: true })
+  isActive: boolean;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @OneToMany(() => Transaction, (transaction) => transaction.user)
+  transactions: Transaction[];
+
+  @OneToOne(() => Wallet, (wallet) => wallet.user)
+  @JoinColumn({ name: 'wallet_id' })
+  wallet: Wallet;
+
+  constructor(partial: Partial<User>) {
+    Object.assign(this, partial);
+  }
 }

@@ -1,4 +1,8 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -13,18 +17,23 @@ export class UsersService {
   ) {}
 
   // get all users
-  async getUsers(): Promise<any> {
+  async getUsers(): Promise<User[]> {
     const users = await this.usersRepository.find();
     return users;
   }
 
-  // find one  user
-  async findUser(email: string): Promise<User | undefined> {
+  // find a single user
+  async findUser(email: string): Promise<User> {
     return await this.usersRepository.findOneBy({ email });
   }
 
+  //Find a user by id
+  async findUserById(id: string) {
+    return await this.usersRepository.findOneBy({ id });
+  }
+
   // create user
-  async createUser(createUserDto: CreateUserDto): Promise<any> {
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
     // check if user exists
     const isUser = await this.findUser(createUserDto.email);
 
@@ -38,9 +47,17 @@ export class UsersService {
     // create  & save user
     const user = this.usersRepository.create(createUserDto);
     const newUser = await this.usersRepository.save(user);
+    return newUser;
+  }
 
-    // eslint-disable-next-line no-unused-vars
-    const { password, ...result } = newUser;
-    return result;
+  // Remove a user
+  async removeUser(id: string): Promise<void> {
+    const user = await this.usersRepository.findOneBy({ id });
+
+    if (!user) {
+      throw new NotFoundException('User does not exist!');
+    }
+
+    await this.usersRepository.delete(id);
   }
 }
