@@ -1,12 +1,12 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToOne, PrimaryColumn } from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 
 @Entity()
 export class Wallet {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn({ length: 10 })
   id: string;
 
-  @Column({ type: 'numeric', default: 0.0 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0.0 })
   balance: number;
 
   @OneToOne(() => User, (user) => user.wallet)

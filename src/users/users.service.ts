@@ -18,7 +18,11 @@ export class UsersService {
 
   // get all users
   async getUsers(): Promise<User[]> {
-    const users = await this.usersRepository.find();
+    const users = await this.usersRepository.find({
+      relations: {
+        wallet: true,
+      },
+    });
     return users;
   }
 

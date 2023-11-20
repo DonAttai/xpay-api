@@ -6,25 +6,22 @@ import { UsersModule } from './users/users.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { AuthModule } from './auth/auth.module';
 import { WalletModule } from './wallet/wallet.module';
+import { ConfigModule } from '@nestjs/config';
+import { config } from './config/config';
 
 @Module({
-  controllers: [AppController],
-  providers: [AppService],
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: 'msjay1043',
-      database: 'ivory_payment',
-      synchronize: true,
-      autoLoadEntities: true,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env.development'],
     }),
+    TypeOrmModule.forRootAsync(config),
     UsersModule,
     TransactionsModule,
     AuthModule,
     WalletModule,
   ],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}

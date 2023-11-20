@@ -1,16 +1,16 @@
 import {
   Body,
-  ClassSerializerInterceptor,
   Controller,
-  NotFoundException,
+  Get,
   Param,
   Post,
-  UseInterceptors,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionsService } from './transactions.service';
 import { UsersService } from 'src/users/users.service';
-import { Transaction } from './transaction.entity';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('api/users')
 export class TransactionsController {
@@ -19,22 +19,23 @@ export class TransactionsController {
     private readonly transactionService: TransactionsService,
   ) {}
 
-  @UseInterceptors(ClassSerializerInterceptor)
+  @UseGuards(JwtAuthGuard)
   @Post(':id/transactions')
-  async createTransaction(
+  createTransaction(
     @Param('id') id: string,
     @Body() createTransactionDto: CreateTransactionDto,
+    @Request() req,
   ) {
-    const user = await this.userService.findUserById(id);
-
-    if (!user) {
-      throw new NotFoundException('User Not Found!');
-    }
-    const transaction = await this.transactionService.createTransaction(
+    return this.transactionService.createTransaction(
       id,
       createTransactionDto,
+      req.user,
     );
+  }
 
-    return new Transaction(transaction);
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/transactions')
+  getUserTrnsactions(userId: string) {
+    return this.transactionService.getUserTransactions(userId);
   }
 }

@@ -1,10 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Transaction, TransactionTypes } from './transaction.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UsersService } from 'src/users/users.service';
 import { WalletService } from 'src/wallet/wallet.service';
+import { Wallet } from 'src/wallet/wallet.entities';
 import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
@@ -12,60 +18,96 @@ export class TransactionsService {
   constructor(
     private userService: UsersService,
     private walletService: WalletService,
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    @InjectRepository(Wallet)
+    private walletRepository: Repository<Wallet>,
     @InjectRepository(Transaction)
     private transactionRepository: Repository<Transaction>,
   ) {}
 
-  // Add a transaction
+  // Get all transactions
+  async getAllTransactions() {
+    return await this.transactionRepository.find();
+  }
+
+  //Get the transactions of a single user
+  async getUserTransactions(userId: string) {
+    const user = await this.userService.findUserById(userId);
+    return user.transactions;
+  }
+
+  //Add a transaction
   async createTransaction(
-    id: string,
+    userId: string,
     createTransactionDto: CreateTransactionDto,
-  ): Promise<Transaction> {
-    const user = await this.userService.findUserById(id);
+    currentUser: Partial<User>,
+  ) {
+    if (userId !== currentUser.id) {
+      throw new UnauthorizedException();
+    }
+    const user = await this.userService.findUserById(userId);
 
     if (!user) {
       throw new NotFoundException('User not found!');
     }
+
+    // Create transaction
     const transaction = this.transactionRepository.create({
       ...createTransactionDto,
       user,
     });
 
-    // Get wallet
+    // find wallet
     const wallet = await this.walletService.findWallet(
       createTransactionDto.walletId,
     );
 
+    // if wallet doesn't exists
+    if (!wallet) {
+      throw new NotFoundException('Wallet Not Found!');
+    }
+
+    // Handle transaction types
     switch (createTransactionDto.type) {
-      //Deposite
+      //Deposit
       case TransactionTypes.DEPOSITE:
-        wallet.balance += transaction.amount;
+        wallet.balance = +wallet.balance + createTransactionDto.amount;
+        await this.walletRepository.save(wallet);
+        break;
+
+      //Withdraw
+      case TransactionTypes.WITHDRAW:
+        // Confirm user wallet Id
+        if (createTransactionDto.walletId !== user.wallet.id) {
+          throw new UnauthorizedException('Invalid wallet Id!');
+        }
+        // check user balance
+        if (+user.wallet.balance < createTransactionDto.amount) {
+          throw new ForbiddenException('Insufficient Balance!');
+        }
+        user.wallet.balance =
+          +user.wallet.balance - createTransactionDto.amount;
+        await this.walletRepository.save(user.wallet);
+        return { message: 'Successful!' };
         break;
 
       // Transfer
       case TransactionTypes.TRANSFER:
-        if (user.wallet.balance < createTransactionDto.amount) {
-          throw new Error('Insufficient balance!');
+        // Check user balance
+        if (+user.wallet.balance < createTransactionDto.amount) {
+          throw new ForbiddenException('Insufficient Balance!');
         }
-        wallet.balance += transaction.amount;
+        user.wallet.balance =
+          +user.wallet.balance - createTransactionDto.amount;
+        await this.walletRepository.save(user.wallet);
+        wallet.balance = +wallet.balance + createTransactionDto.amount;
+        await this.walletRepository.save(wallet);
         break;
-
-      //Withdrawal
-      case TransactionTypes.WITHDRAW:
-        if (user.wallet.balance < createTransactionDto.amount) {
-          throw new Error('Insufficient balance!');
-        }
-        user.wallet.balance -= transaction.amount;
-        break;
-
       default:
-        return null;
+        throw new ForbiddenException(
+          `${createTransactionDto.type} is not a service`,
+        );
     }
-
-    await this.usersRepository.save(user);
-    const savedTransaction = await this.transactionRepository.save(transaction);
-    return savedTransaction;
+    this.transactionRepository.save(transaction);
+    return { message: 'Transaction was successfully created!' };
   }
 }
