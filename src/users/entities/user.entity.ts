@@ -12,6 +12,11 @@ import { Transaction } from 'src/transactions/transaction.entity';
 import { Wallet } from 'src/wallet/wallet.entities';
 import { Exclude } from 'class-transformer';
 
+export enum Role {
+  USER = 'User',
+  ADMIN = 'Admin',
+}
+
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -32,6 +37,8 @@ export class User {
 
   @Column({ name: 'active', default: true })
   isActive: boolean;
+  @Column({ type: 'enum', enum: Role, default: Role.USER })
+  roles: Role[];
 
   @CreateDateColumn()
   createdAt: Date;

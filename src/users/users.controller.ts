@@ -13,9 +13,11 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './entities/user.entity';
+import { Role, User } from './entities/user.entity';
 import { Response } from 'express';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
+import { RolesGuard } from 'src/auth/roles.guard';
 
 @Controller('api/users')
 export class UsersController {
@@ -28,9 +30,10 @@ export class UsersController {
     return new User(await this.usersService.createUser(createUserDto));
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @UseInterceptors(ClassSerializerInterceptor)
   @Get()
+  @Roles(Role.ADMIN)
   async getUsers() {
     const users = await this.usersService.getUsers();
     return users.map((user) => new User(user));

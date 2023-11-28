@@ -13,7 +13,6 @@ import { config } from './config/config';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env.development'],
     }),
     TypeOrmModule.forRootAsync(config),
     UsersModule,

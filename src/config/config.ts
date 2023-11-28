@@ -3,7 +3,6 @@ import { TypeOrmModuleAsyncOptions } from '@nestjs/typeorm';
 
 export const config: TypeOrmModuleAsyncOptions = {
   imports: [ConfigModule],
-  inject: [ConfigService],
   useFactory: async (configService: ConfigService) => ({
     type: 'mysql',
     host: configService.get('DB_HOST'),
@@ -14,4 +13,5 @@ export const config: TypeOrmModuleAsyncOptions = {
     synchronize: true,
     autoLoadEntities: true,
   }),
+  inject: [ConfigService],
 };
