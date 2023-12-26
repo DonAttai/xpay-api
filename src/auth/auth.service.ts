@@ -22,7 +22,7 @@ export class AuthService {
     const comparePassword = await bcrypt.compare(password, user.password);
 
     if (!comparePassword) {
-      throw new UnauthorizedException('Invalid password!');
+      throw new UnauthorizedException('Invalid credentials!');
     }
     if (user && comparePassword) {
       return user;
@@ -32,13 +32,14 @@ export class AuthService {
 
   async login(user: any) {
     const payload = { email: user.email, sub: user.id };
-    const { firstName, lastName, isActive } = user;
+    const { firstName, lastName, isActive, roles } = user;
 
     return {
-      access_token: this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload),
       firstName,
       lastName,
       isActive,
+      roles,
     };
   }
 }

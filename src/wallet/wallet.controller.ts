@@ -15,6 +15,7 @@ export class WalletController {
   constructor(private walletService: WalletService) {}
   @UseGuards(JwtAuthGuard)
   @Post(':id/wallet')
+  // create wallet
   createWallet(
     @Param('id') id: string,
     @Body() createwalletDto: CreateWalletDto,

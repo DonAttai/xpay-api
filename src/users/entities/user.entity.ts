@@ -13,8 +13,8 @@ import { Wallet } from 'src/wallet/wallet.entities';
 import { Exclude } from 'class-transformer';
 
 export enum Role {
-  USER = 'User',
-  ADMIN = 'Admin',
+  USER = 'user',
+  ADMIN = 'admin',
 }
 
 @Entity('users')
@@ -37,7 +37,7 @@ export class User {
 
   @Column({ name: 'active', default: true })
   isActive: boolean;
-  @Column({ type: 'enum', enum: Role, default: Role.USER })
+  @Column({ type: 'set', enum: Role, default: [Role.USER] })
   roles: Role[];
 
   @CreateDateColumn()

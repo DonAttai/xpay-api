@@ -1,8 +1,8 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -31,7 +31,7 @@ export class WalletService {
     currentUser: Partial<User>,
   ) {
     if (userId !== currentUser.id) {
-      throw new UnauthorizedException();
+      throw new ForbiddenException();
     }
     const user = await this.userService.findUserById(userId);
 
