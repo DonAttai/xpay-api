@@ -1,4 +1,4 @@
 export class CreateWalletDto {
-  id: string;
+  id?: string;
   balance: number;
 }

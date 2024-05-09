@@ -1,32 +1,49 @@
 import {
+  Body,
   ClassSerializerInterceptor,
   Controller,
   Get,
   HttpCode,
   Post,
-  Request,
+  Req,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './local-auth.guard';
 import { JwtAuthGuard } from './jwt-auth.guard';
+import { UsersService } from 'src/users/users.service';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { ApiTags } from '@nestjs/swagger';
+import { User } from 'src/users/entities/user.entity';
+import { Request } from 'express';
 
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private usersService: UsersService,
+  ) {}
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
   @HttpCode(200)
-  async signIn(@Request() req) {
+  async signIn(@Req() req: Request) {
     return await this.authService.login(req.user);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(ClassSerializerInterceptor)
+  @Post('register')
+  @HttpCode(201)
+  async signUp(@Body() createUserDto: CreateUserDto) {
+    return new User(await this.usersService.signUp(createUserDto));
+  }
+
   @UseInterceptors(ClassSerializerInterceptor)
   @Get('profile')
-  getProfile(@Request() req) {
+  @UseGuards(JwtAuthGuard)
+  getProfile(@Req() req: Request) {
     return req.user;
   }
 }

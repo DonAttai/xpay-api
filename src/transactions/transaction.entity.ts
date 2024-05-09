@@ -1,4 +1,11 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 
 export enum TransactionTypes {
@@ -17,6 +24,18 @@ export class Transaction {
 
   @Column({ type: 'numeric' })
   amount: number;
+
+  @Column({ default: 'pending' })
+  status?: 'success' | 'pending' | 'failed';
+
+  @Column()
+  description: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @ManyToOne(() => User, (user) => user.transactions)
   user: User;

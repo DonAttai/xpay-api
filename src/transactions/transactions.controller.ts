@@ -3,39 +3,49 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Post,
-  Request,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { TransactionsService } from './transactions.service';
 import { UsersService } from 'src/users/users.service';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { ApiTags } from '@nestjs/swagger';
+import { RolesGuard } from 'src/auth/roles.guard';
+import { Roles } from 'src/auth/roles.decorator';
+import { Role } from 'src/users/entities/user.entity';
+import { UserGuard } from 'src/guards/user.guard';
 
-@Controller('api/users')
+@ApiTags('Transaction')
+@Controller()
+@UseGuards(JwtAuthGuard)
 export class TransactionsController {
-  constructor(
-    private readonly userService: UsersService,
-    private readonly transactionService: TransactionsService,
-  ) {}
+  constructor(private readonly transactionService: TransactionsService) {}
 
-  @UseGuards(JwtAuthGuard)
-  @Post(':id/transactions')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get('transactions')
+  getAllTransactions() {
+    return this.transactionService.getAllTransactions();
+  }
+
+  @Post(':userId/transactions')
+  @UseGuards(UserGuard)
   createTransaction(
-    @Param('id') id: string,
+    @Param('userId', ParseIntPipe) userId: number,
     @Body() createTransactionDto: CreateTransactionDto,
-    @Request() req,
   ) {
     return this.transactionService.createTransaction(
-      id,
+      userId,
       createTransactionDto,
-      req.user,
     );
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get(':id/transactions')
-  getUserTrnsactions(userId: string) {
+  @Get('users/:userId/transactions')
+  @UseGuards(UserGuard)
+  getUserTransactions(@Param('userId', ParseIntPipe) userId: number) {
     return this.transactionService.getUserTransactions(userId);
   }
 }

@@ -9,6 +9,7 @@ import { WalletModule } from './wallet/wallet.module';
 import { ConfigModule } from '@nestjs/config';
 import { config } from './config/config';
 import { MailModule } from './mail/mail.module';
+import { PaystackModule } from './paystack/paystack.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { MailModule } from './mail/mail.module';
     AuthModule,
     WalletModule,
     MailModule,
+    PaystackModule,
   ],
   controllers: [AppController],
   providers: [AppService],

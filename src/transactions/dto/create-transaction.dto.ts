@@ -10,5 +10,10 @@ export class CreateTransactionDto {
   amount: number;
 
   @IsNotEmpty()
+  @IsString()
+  description: string;
+
+  @IsNotEmpty()
+  @IsString()
   walletId: string;
 }

@@ -19,35 +19,33 @@ export class WalletService {
     private userService: UsersService,
   ) {}
 
-  //Find wallet
-  async findWallet(id: string): Promise<Wallet> {
-    return await this.walletRepository.findOneBy({ id });
-  }
-
   //Create wallet
-  async createWallet(
-    userId: string,
-    createWalletDto: CreateWalletDto,
-    currentUser: Partial<User>,
-  ) {
-    if (userId !== currentUser.id) {
-      throw new ForbiddenException();
-    }
+  async createWallet(userId: number, createWalletDto: CreateWalletDto) {
     const user = await this.userService.findUserById(userId);
 
-    if (!user) {
-      throw new NotFoundException('User Not Found!');
-    }
+    if (!user) throw new NotFoundException('User Not Found!');
 
     // check if user has wallet
-    if (user.wallet) {
-      throw new ConflictException('You have a wallet!');
-    }
+    if (user.wallet) throw new ConflictException('You have a wallet!');
+
     const wallet = this.walletRepository.create({
       ...createWalletDto,
       user,
     });
     await this.walletRepository.save(wallet);
     return { message: 'Wallet was successfully created!' };
+  }
+
+  async creditBeneficiaryWallet(walletId: string, amount: number) {
+    const wallet = await this.walletRepository.findOne({
+      where: { id: walletId },
+    });
+
+    if (!wallet) {
+      throw new NotFoundException('Wallet not found');
+    }
+    wallet.balance += amount;
+
+    await this.walletRepository.save(wallet);
   }
 }

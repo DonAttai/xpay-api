@@ -18,12 +18,7 @@ export class UsersService {
 
   // get all users
   async getUsers(): Promise<User[]> {
-    const users = await this.usersRepository.find({
-      relations: {
-        wallet: true,
-      },
-    });
-    return users;
+    return await this.usersRepository.find({});
   }
 
   // find a single user
@@ -32,12 +27,44 @@ export class UsersService {
   }
 
   //Find a user by id
-  async findUserById(id: string) {
-    return await this.usersRepository.findOneBy({ id });
+  async findUserById(userId: number) {
+    return await this.usersRepository.findOneBy({ id: userId });
+  }
+
+  // get user with wallet
+  async getUserWithWallet(userId: number): Promise<User | undefined> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['wallet'],
+    });
+    if (!user) {
+      return undefined;
+    }
+    return user;
+  }
+
+  async debitRemitterWallet(userId: number, amount: number): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['wallet'],
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
+    user.wallet.balance -= amount;
+    return this.usersRepository.save(user);
+  }
+
+  // found user wallet
+  async fundWallet(userId: number, amount: number) {
+    const user = await this.getUserWithWallet(userId);
+    user.wallet.balance += amount;
+    return await this.usersRepository.save(user);
   }
 
   // create user
-  async createUser(createUserDto: CreateUserDto): Promise<User> {
+  async signUp(createUserDto: CreateUserDto): Promise<User> {
     // check if user exists
     const isUser = await this.findUser(createUserDto.email);
 
@@ -55,7 +82,7 @@ export class UsersService {
   }
 
   // Remove a user
-  async removeUser(id: string): Promise<void> {
+  async removeUser(id: number): Promise<void> {
     const user = await this.usersRepository.findOneBy({ id });
 
     if (!user) {

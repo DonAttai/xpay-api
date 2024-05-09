@@ -1,4 +1,5 @@
 import {
+  AfterLoad,
   Column,
   CreateDateColumn,
   Entity,
@@ -19,8 +20,8 @@ export enum Role {
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({ unique: true })
   email: string;
@@ -37,7 +38,7 @@ export class User {
 
   @Column({ name: 'active', default: true })
   isActive: boolean;
-  @Column({ type: 'set', enum: Role, default: [Role.USER] })
+  @Column({ type: 'set', enum: Role, default: Role.USER })
   roles: Role[];
 
   @CreateDateColumn()
@@ -50,7 +51,6 @@ export class User {
   transactions: Transaction[];
 
   @OneToOne(() => Wallet, (Wallet) => Wallet.user, {
-    eager: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'wallet_id' })

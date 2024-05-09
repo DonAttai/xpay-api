@@ -1,4 +1,11 @@
-import { Column, Entity, OneToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToOne,
+  PrimaryColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { User } from 'src/users/entities/user.entity';
 
 const createWalletId = () => {
@@ -7,15 +14,19 @@ const createWalletId = () => {
   return date + number;
 };
 
-const walletId = createWalletId();
-console.log(walletId);
 @Entity()
 export class Wallet {
-  @PrimaryColumn({ unique: true, default: walletId })
-  id: string;
+  @PrimaryColumn({ unique: true })
+  id: string = createWalletId();
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0.0 })
   balance: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 
   @OneToOne(() => User, (user) => user.wallet)
   user: User;

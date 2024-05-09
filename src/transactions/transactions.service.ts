@@ -11,67 +11,49 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UsersService } from 'src/users/users.service';
 import { WalletService } from 'src/wallet/wallet.service';
 import { Wallet } from 'src/wallet/wallet.entities';
-import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class TransactionsService {
   constructor(
     private userService: UsersService,
     private walletService: WalletService,
-    @InjectRepository(Wallet)
-    private walletRepository: Repository<Wallet>,
     @InjectRepository(Transaction)
     private transactionRepository: Repository<Transaction>,
   ) {}
 
   // Get all transactions
   async getAllTransactions() {
-    return await this.transactionRepository.find();
+    const transactions = await this.transactionRepository.find();
+    return transactions;
   }
 
   //Get the transactions of a single user
-  async getUserTransactions(userId: string) {
-    const user = await this.userService.findUserById(userId);
-    return user.transactions;
+  async getUserTransactions(userId: number) {
+    const transactions = await this.transactionRepository.find({
+      where: { user: { id: userId } },
+    });
+    return transactions;
   }
 
   //Add a transaction
   async createTransaction(
-    userId: string,
+    userId: number,
     createTransactionDto: CreateTransactionDto,
-    currentUser: Partial<User>,
   ) {
-    if (userId !== currentUser.id) {
-      throw new UnauthorizedException();
-    }
-    const user = await this.userService.findUserById(userId);
+    const user = await this.userService.getUserWithWallet(userId);
 
     if (!user) {
       throw new NotFoundException('User not found!');
-    }
-
-    // Create transaction
-    const transaction = this.transactionRepository.create({
-      ...createTransactionDto,
-      user,
-    });
-
-    // find wallet
-    const wallet = await this.walletService.findWallet(
-      createTransactionDto.walletId,
-    );
-
-    // if wallet doesn't exists
-    if (!wallet) {
-      throw new NotFoundException('Wallet Not Found!');
     }
 
     // Handle transaction types
     switch (createTransactionDto.type) {
       //Deposit
       case TransactionTypes.DEPOSITE:
-        wallet.balance = +wallet.balance + createTransactionDto.amount;
-        await this.walletRepository.save(wallet);
+        await this.walletService.creditBeneficiaryWallet(
+          createTransactionDto.walletId,
+          createTransactionDto.amount,
+        );
         break;
 
       //Withdraw
@@ -81,32 +63,45 @@ export class TransactionsService {
           throw new UnauthorizedException('Invalid wallet Id!');
         }
         // check user balance
-        if (+user.wallet.balance < createTransactionDto.amount) {
+        if (user.wallet.balance < createTransactionDto.amount) {
           throw new ForbiddenException('Insufficient Balance!');
         }
-        user.wallet.balance =
-          +user.wallet.balance - createTransactionDto.amount;
-        await this.walletRepository.save(user.wallet);
-        return { message: 'Successful!' };
+        await this.userService.debitRemitterWallet(
+          userId,
+          createTransactionDto.amount,
+        );
         break;
 
       // Transfer
       case TransactionTypes.TRANSFER:
         // Check user balance
-        if (+user.wallet.balance < createTransactionDto.amount) {
+        if (user.wallet.balance < createTransactionDto.amount) {
           throw new ForbiddenException('Insufficient Balance!');
         }
-        user.wallet.balance =
-          +user.wallet.balance - createTransactionDto.amount;
-        await this.walletRepository.save(user.wallet);
-        wallet.balance = +wallet.balance + createTransactionDto.amount;
-        await this.walletRepository.save(wallet);
+        // debit sender wallet
+        await this.userService.debitRemitterWallet(
+          userId,
+          createTransactionDto.amount,
+        );
+
+        // credit receiver wallet
+        await this.walletService.creditBeneficiaryWallet(
+          createTransactionDto.walletId,
+          createTransactionDto.amount,
+        );
         break;
       default:
         throw new ForbiddenException(
           `${createTransactionDto.type} is not a service`,
         );
     }
+
+    // Create transaction
+    const transaction = this.transactionRepository.create({
+      ...createTransactionDto,
+      user,
+    });
+
     this.transactionRepository.save(transaction);
     return { message: 'Transaction was successfully created!' };
   }
