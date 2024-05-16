@@ -6,10 +6,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Wallet } from './wallet.entities';
+import { Wallet } from './wallet.entity';
 import { UsersService } from 'src/users/users.service';
 import { CreateWalletDto } from './dto/create-wallet.dto';
-import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class WalletService {
@@ -44,8 +43,27 @@ export class WalletService {
     if (!wallet) {
       throw new NotFoundException('Wallet not found');
     }
-    wallet.balance += amount;
+    wallet.balance = +wallet.balance + amount;
 
-    await this.walletRepository.save(wallet);
+    return await this.walletRepository.save(wallet);
+  }
+
+  async debitRemiterWallet(walletId: string, amount: number) {
+    const wallet = await this.walletRepository.findOne({
+      where: { id: walletId },
+    });
+    if (!wallet) {
+      throw new NotFoundException('Wallet not found');
+    }
+    wallet.balance = +wallet.balance - amount;
+    return await this.walletRepository.save(wallet);
+  }
+
+  async getWalletWithUser(walletId: string) {
+    const wallet = await this.walletRepository.findOne({
+      where: { id: walletId },
+      relations: ['user'],
+    });
+    return wallet;
   }
 }

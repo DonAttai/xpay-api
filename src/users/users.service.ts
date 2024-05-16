@@ -43,23 +43,10 @@ export class UsersService {
     return user;
   }
 
-  async debitRemitterWallet(userId: number, amount: number): Promise<User> {
-    const user = await this.usersRepository.findOne({
-      where: { id: userId },
-      relations: ['wallet'],
-    });
-
-    if (!user) {
-      throw new NotFoundException('User not found!');
-    }
-    user.wallet.balance -= amount;
-    return this.usersRepository.save(user);
-  }
-
   // found user wallet
   async fundWallet(userId: number, amount: number) {
     const user = await this.getUserWithWallet(userId);
-    user.wallet.balance += amount;
+    user.wallet.balance = +user.wallet.balance + amount;
     return await this.usersRepository.save(user);
   }
 

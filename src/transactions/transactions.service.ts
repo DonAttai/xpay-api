@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UsersService } from 'src/users/users.service';
 import { WalletService } from 'src/wallet/wallet.service';
-import { Wallet } from 'src/wallet/wallet.entities';
+import { Wallet } from 'src/wallet/wallet.entity';
 
 @Injectable()
 export class TransactionsService {
@@ -66,8 +66,8 @@ export class TransactionsService {
         if (user.wallet.balance < createTransactionDto.amount) {
           throw new ForbiddenException('Insufficient Balance!');
         }
-        await this.userService.debitRemitterWallet(
-          userId,
+        await this.walletService.debitRemiterWallet(
+          user.wallet.id,
           createTransactionDto.amount,
         );
         break;
@@ -79,8 +79,8 @@ export class TransactionsService {
           throw new ForbiddenException('Insufficient Balance!');
         }
         // debit sender wallet
-        await this.userService.debitRemitterWallet(
-          userId,
+        await this.walletService.debitRemiterWallet(
+          user.wallet.id,
           createTransactionDto.amount,
         );
 
@@ -95,14 +95,31 @@ export class TransactionsService {
           `${createTransactionDto.type} is not a service`,
         );
     }
-
-    // Create transaction
-    const transaction = this.transactionRepository.create({
-      ...createTransactionDto,
+    // Create user transaction
+    const userTransaction = this.transactionRepository.create({
       user,
+      ...createTransactionDto,
+    });
+    if (userTransaction) {
+      userTransaction.status = 'success';
+    }
+    await this.transactionRepository.save(userTransaction);
+
+    // create beneficiary transaction
+    const beneficiaryWallet = await this.walletService.getWalletWithUser(
+      createTransactionDto.walletId,
+    );
+    const beneficiaryTransaction = this.transactionRepository.create({
+      ...createTransactionDto,
+      type: TransactionTypes.CREDIT,
+      user: beneficiaryWallet.user,
     });
 
-    this.transactionRepository.save(transaction);
+    if (beneficiaryTransaction) {
+      beneficiaryTransaction.status = 'success';
+    }
+    await this.transactionRepository.save(beneficiaryTransaction);
+
     return { message: 'Transaction was successfully created!' };
   }
 }

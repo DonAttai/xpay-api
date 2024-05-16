@@ -6,7 +6,7 @@ import { UsersModule } from 'src/users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './jwt.strategy';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { RolesGuard } from './roles.guard';
 
 @Module({
@@ -14,7 +14,6 @@ import { RolesGuard } from './roles.guard';
     UsersModule,
     PassportModule,
     JwtModule.registerAsync({
-      // imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
         signOptions: { expiresIn: '24h' },

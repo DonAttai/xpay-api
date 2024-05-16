@@ -1,5 +1,4 @@
 import {
-  AfterLoad,
   Column,
   CreateDateColumn,
   Entity,
@@ -10,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Transaction } from 'src/transactions/transaction.entity';
-import { Wallet } from 'src/wallet/wallet.entities';
+import { Wallet } from 'src/wallet/wallet.entity';
 import { Exclude } from 'class-transformer';
 
 export enum Role {

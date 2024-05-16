@@ -21,10 +21,11 @@ export class PaystackService {
     }
   }
 
-  async paystackWebhook(event: any, userId: number) {
+  async paystackWebhook(eventData: any, userId: number) {
+    const { data, event } = eventData;
     try {
-      if (event.event.charge === 'charge.success') {
-        const { amount } = event;
+      if (event === 'charge.success') {
+        const { amount } = data;
         await this.userService.fundWallet(userId, amount);
       }
     } catch (error) {

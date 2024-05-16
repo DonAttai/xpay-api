@@ -12,6 +12,8 @@ export enum TransactionTypes {
   DEPOSITE = 'deposit',
   WITHDRAW = 'withdraw',
   TRANSFER = 'transfer',
+  CREDIT = 'credit',
+  DEBIT = 'debit',
 }
 
 @Entity('transactions')
