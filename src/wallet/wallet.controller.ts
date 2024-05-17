@@ -20,10 +20,7 @@ export class WalletController {
   // create wallet
   @UseGuards(JwtAuthGuard)
   @Post(':userId/wallet')
-  createWallet(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Body() createwalletDto: CreateWalletDto,
-  ) {
-    return this.walletService.createWallet(userId, createwalletDto);
+  createWallet(@Param('userId', ParseIntPipe) userId: number) {
+    return this.walletService.createWallet(userId);
   }
 }

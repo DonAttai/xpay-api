@@ -19,7 +19,7 @@ export class WalletService {
   ) {}
 
   //Create wallet
-  async createWallet(userId: number, createWalletDto: CreateWalletDto) {
+  async createWallet(userId: number) {
     const user = await this.userService.findUserById(userId);
 
     if (!user) throw new NotFoundException('User Not Found!');
@@ -28,7 +28,6 @@ export class WalletService {
     if (user.wallet) throw new ConflictException('You have a wallet!');
 
     const wallet = this.walletRepository.create({
-      ...createWalletDto,
       user,
     });
     await this.walletRepository.save(wallet);

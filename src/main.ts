@@ -6,7 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix('api', { exclude: ['/'] });
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT');
@@ -24,7 +24,7 @@ async function bootstrap() {
     .addTag('x-pay')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('@api', app, document);
+  SwaggerModule.setup('api', app, document);
 
   await app.listen(port);
 }
