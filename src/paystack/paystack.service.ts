@@ -25,6 +25,7 @@ export class PaystackService {
 
   async paystackWebhook(eventData: any, userId: number) {
     const { data, event } = eventData;
+    console.log(data);
     try {
       if (event === 'charge.success') {
         const { amount } = data;
