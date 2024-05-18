@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Paystack } from 'src/helpers/paystack';
 import { UsersService } from 'src/users/users.service';
 import { WalletService } from 'src/wallet/wallet.service';
+import crypto from 'crypto';
 
 @Injectable()
 export class PaystackService {
@@ -23,14 +24,20 @@ export class PaystackService {
     }
   }
 
-  async paystackWebhook(eventData: any, userId: number) {
-    const { data, event } = eventData;
-    console.log(data);
+  async paystackWebhook(eventData: any, userId: number, headers: any) {
     try {
-      if (event === 'charge.success') {
-        const { amount } = data;
-        const user = await this.userService.getUserWithWallet(userId);
-        return await this.walletService.fundWallet(user.wallet.id, amount);
+      const hash = crypto
+        .createHmac('sha512', process.env.PAYSTACK_SECRET_KEY)
+        .update(JSON.stringify(eventData))
+        .digest('hex');
+      if (hash == headers['x-paystack-signature']) {
+        const { data, event } = eventData;
+        console.log(data);
+        if (event === 'charge.success') {
+          const { amount } = data;
+          const user = await this.userService.getUserWithWallet(userId);
+          return await this.walletService.fundWallet(user.wallet.id, amount);
+        }
       }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
