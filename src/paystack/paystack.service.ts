@@ -30,7 +30,7 @@ export class PaystackService {
         .createHmac('sha512', process.env.PAYSTACK_SECRET_KEY)
         .update(JSON.stringify(eventData))
         .digest('hex');
-      if (hash == headers['x-paystack-signature']) {
+      if (hash === headers['x-paystack-signature']) {
         const { data, event } = eventData;
         console.log(data);
         if (event === 'charge.success') {

@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { PaystackService } from './paystack.service';
 import { PaystackController } from './paystack.controller';
-import { ConfigService } from '@nestjs/config';
 import { Paystack } from 'src/helpers/paystack';
 import { UsersModule } from 'src/users/users.module';
 import { WalletModule } from 'src/wallet/wallet.module';

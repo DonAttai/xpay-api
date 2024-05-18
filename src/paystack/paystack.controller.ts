@@ -25,7 +25,7 @@ export class PaystackController {
     @Req() req: any,
     @Res() res: Response,
   ) {
-    await this.paystackService.paystackWebhook(event, req.user.id);
+    await this.paystackService.paystackWebhook(event, req.user.id, req.headers);
     return res.sendStatus(200);
   }
 }
