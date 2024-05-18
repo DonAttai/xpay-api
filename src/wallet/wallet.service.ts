@@ -65,4 +65,10 @@ export class WalletService {
     });
     return wallet;
   }
+
+  async fundWallet(walletId: string, amount: number) {
+    const wallet = await this.walletRepository.findOneBy({ id: walletId });
+    wallet.balance = +wallet.balance + amount;
+    return await this.walletRepository.save(wallet);
+  }
 }

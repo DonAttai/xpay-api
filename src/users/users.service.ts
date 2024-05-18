@@ -43,13 +43,6 @@ export class UsersService {
     return user;
   }
 
-  // found user wallet
-  async fundWallet(userId: number, amount: number) {
-    const user = await this.getUserWithWallet(userId);
-    user.wallet.balance = +user.wallet.balance + amount;
-    return await this.usersRepository.save(user);
-  }
-
   // create user
   async signUp(createUserDto: CreateUserDto): Promise<User> {
     // check if user exists
