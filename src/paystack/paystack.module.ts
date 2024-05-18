@@ -4,9 +4,10 @@ import { PaystackController } from './paystack.controller';
 import { ConfigService } from '@nestjs/config';
 import { Paystack } from 'src/helpers/paystack';
 import { UsersModule } from 'src/users/users.module';
+import { WalletModule } from 'src/wallet/wallet.module';
 
 @Module({
-  imports: [UsersModule],
+  imports: [UsersModule, WalletModule],
   providers: [PaystackService, Paystack],
   controllers: [PaystackController],
 })
