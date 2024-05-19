@@ -26,7 +26,6 @@ export class PaystackController {
       req.user.id,
       req.headers,
     );
-    console.log('controller', req.body);
     return res.sendStatus(200);
   }
 }

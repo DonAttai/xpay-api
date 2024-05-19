@@ -32,8 +32,8 @@ export class PaystackService {
         .digest('hex');
       if (hash === headers['x-paystack-signature']) {
         const { data, event } = eventData;
-        console.log(data);
         if (event === 'charge.success') {
+          console.log('data', data);
           const { amount } = data;
           const user = await this.userService.getUserWithWallet(userId);
           return await this.walletService.fundWallet(user.wallet.id, amount);
