@@ -20,8 +20,12 @@ export class PaystackController {
   }
 
   @Post('webhook')
-  async handleEvent(@Req() req: any, @Res() res: Response) {
-    await this.paystackService.handleEvent(req, req.user.id, req.headers);
+  async handleEvent(
+    @Body() payload: any,
+    @Req() req: any,
+    @Res() res: Response,
+  ) {
+    await this.paystackService.handleEvent(payload, req.user.id, req.headers);
     return res.sendStatus(200);
   }
 }
