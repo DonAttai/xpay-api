@@ -23,7 +23,10 @@ export class UsersService {
 
   // find a single user
   async findUser(email: string): Promise<User> {
-    return await this.usersRepository.findOneBy({ email });
+    return await this.usersRepository.findOne({
+      where: { email },
+      relations: ['wallet'],
+    });
   }
 
   //Find a user by id

@@ -24,19 +24,20 @@ export class PaystackService {
     }
   }
 
-  async handleEvent(payload: any, userId: number, headers: any) {
+  async handleEvent(payload: any, req: any) {
     try {
       const hash = crypto
         .createHmac('sha512', process.env.PAYSTACK_SECRET_KEY)
         .update(JSON.stringify(payload))
         .digest('hex');
-      if (hash === headers['x-paystack-signature']) {
+      if (hash === req.headers['x-paystack-signature']) {
         const { data, event } = payload;
         if (event === 'charge.success') {
           console.log('data', data);
           const { amount } = data;
-          const user = await this.userService.getUserWithWallet(userId);
-          return await this.walletService.fundWallet(user.wallet.id, amount);
+          console.log(amount);
+          const user = await this.userService.findUser(data.customer.email);
+          await this.walletService.fundWallet(user.wallet.id, amount);
         }
       }
     } catch (error) {

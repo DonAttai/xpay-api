@@ -25,7 +25,7 @@ export class PaystackController {
     @Req() req: any,
     @Res() res: Response,
   ) {
-    await this.paystackService.handleEvent(payload, req.user.id, req.headers);
+    await this.paystackService.handleEvent(payload, req);
     return res.sendStatus(200);
   }
 }
