@@ -19,7 +19,7 @@ export class PaystackController {
     return this.paystackService.initializeTransaction(email, amount);
   }
 
-  @Post('webhook')
+  @Post('webhook/xpay')
   async handleEvent(
     @Body() payload: any,
     @Req() req: any,
