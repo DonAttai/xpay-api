@@ -31,6 +31,7 @@ export class PaystackService {
       .digest('hex');
     try {
       if (hash === req.headers['x-paystack-signature']) {
+        console.log('paystack');
         const { data, event } = payload;
         if (event === 'charge.success') {
           console.log('data', data);
