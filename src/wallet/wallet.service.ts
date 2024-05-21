@@ -3,12 +3,12 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Wallet } from './wallet.entity';
-import { UsersService } from 'src/users/users.service';
-import { CreateWalletDto } from './dto/create-wallet.dto';
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { Wallet } from "./wallet.entity";
+import { UsersService } from "src/users/users.service";
+import { CreateWalletDto } from "./dto/create-wallet.dto";
 
 @Injectable()
 export class WalletService {
@@ -22,16 +22,16 @@ export class WalletService {
   async createWallet(userId: number) {
     const user = await this.userService.findUserById(userId);
 
-    if (!user) throw new NotFoundException('User Not Found!');
+    if (!user) throw new NotFoundException("User Not Found!");
 
     // check if user has wallet
-    if (user.wallet) throw new ConflictException('You have a wallet!');
+    if (user.wallet) throw new ConflictException("You have a wallet!");
 
     const wallet = this.walletRepository.create({
       user,
     });
     await this.walletRepository.save(wallet);
-    return { message: 'Wallet was successfully created!' };
+    return { message: "Wallet was successfully created!" };
   }
 
   async creditBeneficiaryWallet(walletId: string, amount: number) {
@@ -40,7 +40,7 @@ export class WalletService {
     });
 
     if (!wallet) {
-      throw new NotFoundException('Wallet not found');
+      throw new NotFoundException("Wallet not found");
     }
     wallet.balance = +wallet.balance + amount;
 
@@ -52,7 +52,7 @@ export class WalletService {
       where: { id: walletId },
     });
     if (!wallet) {
-      throw new NotFoundException('Wallet not found');
+      throw new NotFoundException("Wallet not found");
     }
     wallet.balance = +wallet.balance - amount;
     return await this.walletRepository.save(wallet);
@@ -61,14 +61,14 @@ export class WalletService {
   async getWalletWithUser(walletId: string) {
     const wallet = await this.walletRepository.findOne({
       where: { id: walletId },
-      relations: ['user'],
+      relations: ["user"],
     });
     return wallet;
   }
 
   async fundWallet(walletId: string, amount: number) {
     const wallet = await this.walletRepository.findOneBy({ id: walletId });
-    wallet.balance = +wallet.balance + amount;
+    wallet.balance = +wallet.balance + amount / 100;
     return await this.walletRepository.save(wallet);
   }
 }
