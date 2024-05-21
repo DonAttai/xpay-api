@@ -36,8 +36,8 @@ export class PaystackService {
           console.log('data', data);
           const { amount } = data;
           console.log(amount);
-          const user = await this.userService.findUser(data.customer.email);
-          await this.walletService.fundWallet(user.wallet.id, amount);
+          // const user = await this.userService.findUser(data.customer.email);
+          // await this.walletService.fundWallet(user.wallet.id, amount);
         }
       }
     } catch (error) {
