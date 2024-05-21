@@ -23,13 +23,13 @@ export class PaystackService {
     }
   }
 
-  async handleEvent(payload: any, headers: any) {
+  async handleEvent(payload: any, req: any) {
     const { createHmac } = await import("node:crypto");
     const hash = createHmac("sha512", process.env.PAYSTACK_SECRET_KEY)
       .update(JSON.stringify(payload))
       .digest("hex");
     try {
-      if (hash === headers["x-paystack-signature"]) {
+      if (hash === req.headers["x-paystack-signature"]) {
         const { data, event } = payload;
         if (event === "charge.success") {
           console.log("data", data);

@@ -30,10 +30,10 @@ export class PaystackController {
   @Post("webhook/xpay")
   async handleEvent(
     @Body() payload: any,
-    @Headers() headers: Record<string, string>,
+    @Req() req: any,
     @Res() res: Response,
   ) {
-    await this.paystackService.handleEvent(payload, headers);
+    await this.paystackService.handleEvent(payload, req);
     return res.sendStatus(200);
   }
 }
