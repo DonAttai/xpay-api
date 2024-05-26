@@ -33,7 +33,7 @@ export class PaystackController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    await this.paystackService.handleEvent(payload, req);
+    await this.paystackService.handleEvent(payload, req, res);
     return res.sendStatus(200);
   }
 }

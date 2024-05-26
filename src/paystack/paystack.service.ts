@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { Request } from "express";
+import { Request, Response } from "express";
 import { Paystack } from "src/helpers/paystack";
 import { UsersService } from "src/users/users.service";
 import { WalletService } from "src/wallet/wallet.service";
@@ -24,7 +24,7 @@ export class PaystackService {
     }
   }
 
-  async handleEvent(payload: any, req: Request) {
+  async handleEvent(payload: any, req: Request, res: Response) {
     const { createHmac } = await import("node:crypto");
     const hash = createHmac("sha512", process.env.PAYSTACK_SECRET_KEY)
       .update(JSON.stringify(payload))
@@ -35,7 +35,8 @@ export class PaystackService {
         if (event === "charge.success") {
           const { amount, customer } = data;
           const user = await this.userService.findUser(customer.email);
-          return await this.walletService.fundWallet(user.wallet.id, amount);
+          await this.walletService.fundWallet(user.wallet.id, amount);
+          return res.redirect("https://x-pay.onrender.com/success-page");
         }
       }
     } catch (error) {

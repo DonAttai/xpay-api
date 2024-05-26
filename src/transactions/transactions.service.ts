@@ -77,6 +77,10 @@ export class TransactionsService {
         if (user.wallet.balance < createTransactionDto.amount) {
           throw new ForbiddenException("Insufficient Balance!");
         }
+
+        if (user.wallet.id === createTransactionDto.walletId) {
+          throw new ForbiddenException("Not allowed!");
+        }
         // find beneficiary wallet
         const wallet = await this.walletService.findWalletById(
           createTransactionDto.walletId,
