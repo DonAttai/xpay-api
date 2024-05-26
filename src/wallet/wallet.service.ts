@@ -59,6 +59,9 @@ export class WalletService {
       where: { id: walletId },
       relations: ["user"],
     });
+    if (!wallet) {
+      throw new NotFoundException("Wallet not found");
+    }
     return wallet;
   }
 
