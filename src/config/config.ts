@@ -19,7 +19,7 @@ export const config: TypeOrmModuleAsyncOptions = {
     return {
       type: "mysql",
       url: configService.get("DB_URI"),
-      synchronize: false,
+      synchronize: true,
       autoLoadEntities: true,
     };
   },
