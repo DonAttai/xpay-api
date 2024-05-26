@@ -3,14 +3,13 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
-} from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { Transaction, TransactionTypes } from './transaction.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { UsersService } from 'src/users/users.service';
-import { WalletService } from 'src/wallet/wallet.service';
-import { Wallet } from 'src/wallet/wallet.entity';
+} from "@nestjs/common";
+import { Repository } from "typeorm";
+import { Transaction, TransactionTypes } from "./transaction.entity";
+import { InjectRepository } from "@nestjs/typeorm";
+import { CreateTransactionDto } from "./dto";
+import { UsersService } from "src/users/users.service";
+import { WalletService } from "src/wallet/wallet.service";
 
 @Injectable()
 export class TransactionsService {
@@ -35,7 +34,7 @@ export class TransactionsService {
     return transactions;
   }
 
-  //Add a transaction
+  // confirm transaction
   async createTransaction(
     userId: number,
     createTransactionDto: CreateTransactionDto,
@@ -43,7 +42,7 @@ export class TransactionsService {
     const user = await this.userService.getUserWithWallet(userId);
 
     if (!user) {
-      throw new NotFoundException('User not found!');
+      throw new NotFoundException("User not found!");
     }
 
     // Handle transaction types
@@ -60,11 +59,11 @@ export class TransactionsService {
       case TransactionTypes.WITHDRAW:
         // Confirm user wallet Id
         if (createTransactionDto.walletId !== user.wallet.id) {
-          throw new UnauthorizedException('Invalid wallet Id!');
+          throw new UnauthorizedException("Invalid wallet Id!");
         }
         // check user balance
         if (user.wallet.balance < createTransactionDto.amount) {
-          throw new ForbiddenException('Insufficient Balance!');
+          throw new ForbiddenException("Insufficient Balance!");
         }
         await this.walletService.debitRemiterWallet(
           user.wallet.id,
@@ -76,13 +75,19 @@ export class TransactionsService {
       case TransactionTypes.TRANSFER:
         // Check user balance
         if (user.wallet.balance < createTransactionDto.amount) {
-          throw new ForbiddenException('Insufficient Balance!');
+          throw new ForbiddenException("Insufficient Balance!");
         }
-        // debit sender wallet
-        await this.walletService.debitRemiterWallet(
-          user.wallet.id,
-          createTransactionDto.amount,
+        // find beneficiary wallet
+        const wallet = await this.walletService.findWalletById(
+          createTransactionDto.walletId,
         );
+        // debit sender wallet
+        if (wallet) {
+          await this.walletService.debitRemiterWallet(
+            user.wallet.id,
+            createTransactionDto.amount,
+          );
+        }
 
         // credit receiver wallet
         await this.walletService.creditBeneficiaryWallet(
@@ -90,6 +95,7 @@ export class TransactionsService {
           createTransactionDto.amount,
         );
         break;
+
       default:
         throw new ForbiddenException(
           `${createTransactionDto.type} is not a service`,
@@ -101,7 +107,7 @@ export class TransactionsService {
       ...createTransactionDto,
     });
     if (userTransaction) {
-      userTransaction.status = 'success';
+      userTransaction.status = "success";
     }
     await this.transactionRepository.save(userTransaction);
 
@@ -116,10 +122,12 @@ export class TransactionsService {
     });
 
     if (beneficiaryTransaction) {
-      beneficiaryTransaction.status = 'success';
+      beneficiaryTransaction.status = "success";
     }
     await this.transactionRepository.save(beneficiaryTransaction);
 
-    return { message: 'Transaction was successfully created!' };
+    return {
+      message: `${createTransactionDto.type} was successfully!`,
+    };
   }
 }

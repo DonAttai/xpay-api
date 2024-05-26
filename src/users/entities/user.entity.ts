@@ -7,17 +7,17 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from 'typeorm';
-import { Transaction } from 'src/transactions/transaction.entity';
-import { Wallet } from 'src/wallet/wallet.entity';
-import { Exclude } from 'class-transformer';
+} from "typeorm";
+import { Transaction } from "src/transactions/transaction.entity";
+import { Wallet } from "src/wallet/wallet.entity";
+import { Exclude } from "class-transformer";
 
 export enum Role {
-  USER = 'user',
-  ADMIN = 'admin',
+  USER = "user",
+  ADMIN = "admin",
 }
 
-@Entity('users')
+@Entity("users")
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -35,10 +35,13 @@ export class User {
   @Exclude()
   password: string;
 
-  @Column({ name: 'active', default: true })
+  @Column({ name: "active", default: true })
   isActive: boolean;
-  @Column({ type: 'set', enum: Role, default: Role.USER })
+  @Column({ type: "set", enum: Role, default: Role.USER })
   roles: Role[];
+
+  @Column({ default: false })
+  isVerified?: boolean;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -50,9 +53,9 @@ export class User {
   transactions: Transaction[];
 
   @OneToOne(() => Wallet, (Wallet) => Wallet.user, {
-    onDelete: 'CASCADE',
+    onDelete: "CASCADE",
   })
-  @JoinColumn({ name: 'wallet_id' })
+  @JoinColumn({ name: "wallet_id" })
   wallet: Wallet;
 
   constructor(partial: Partial<User>) {

@@ -34,26 +34,22 @@ export class WalletService {
     return { message: "Wallet was successfully created!" };
   }
 
-  async creditBeneficiaryWallet(walletId: string, amount: number) {
-    const wallet = await this.walletRepository.findOne({
-      where: { id: walletId },
-    });
-
+  async findWalletById(walletId: string) {
+    const wallet = await this.walletRepository.findOneBy({ id: walletId });
     if (!wallet) {
-      throw new NotFoundException("Wallet not found");
+      throw new NotFoundException(`Wallet with id: ${walletId} not found!`);
     }
-    wallet.balance = +wallet.balance + amount;
+    return wallet;
+  }
 
+  async creditBeneficiaryWallet(walletId: string, amount: number) {
+    const wallet = await this.findWalletById(walletId);
+    wallet.balance = +wallet.balance + amount;
     return await this.walletRepository.save(wallet);
   }
 
   async debitRemiterWallet(walletId: string, amount: number) {
-    const wallet = await this.walletRepository.findOne({
-      where: { id: walletId },
-    });
-    if (!wallet) {
-      throw new NotFoundException("Wallet not found");
-    }
+    const wallet = await this.findWalletById(walletId);
     wallet.balance = +wallet.balance - amount;
     return await this.walletRepository.save(wallet);
   }
