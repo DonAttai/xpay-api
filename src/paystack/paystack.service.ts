@@ -17,6 +17,7 @@ export class PaystackService {
       return await this.paystack.initializeTransaction({
         email,
         amount: amount * 100,
+        callback_url: `${process.env.REMOTE_URL}/api/paystack/callback`,
       });
     } catch (error) {
       throw new Error(`Paystack error: 
@@ -24,7 +25,15 @@ export class PaystackService {
     }
   }
 
-  async handleEvent(payload: any, req: Request, res: Response) {
+  async handleCallback(reference: string, res: Response) {
+    const transaction = await this.paystack.verifyPayment(reference);
+
+    if (transaction.status === "success") {
+      return res.redirect("https://x-pay.onrender.com/success-page");
+    }
+  }
+
+  async handleEvent(payload: any, req: Request) {
     const { createHmac } = await import("node:crypto");
     const hash = createHmac("sha512", process.env.PAYSTACK_SECRET_KEY)
       .update(JSON.stringify(payload))
@@ -35,8 +44,7 @@ export class PaystackService {
         if (event === "charge.success") {
           const { amount, customer } = data;
           const user = await this.userService.findUser(customer.email);
-          await this.walletService.fundWallet(user.wallet.id, amount);
-          return res.redirect("https://x-pay.onrender.com/success-page");
+          return await this.walletService.fundWallet(user.wallet.id, amount);
         }
       }
     } catch (error) {

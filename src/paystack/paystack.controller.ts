@@ -6,6 +6,8 @@ import {
   Res,
   Headers,
   UseGuards,
+  Get,
+  Query,
 } from "@nestjs/common";
 
 import { PaystackService } from "./paystack.service";
@@ -27,13 +29,19 @@ export class PaystackController {
     return this.paystackService.initializeTransaction(email, amount);
   }
 
+  @Get("callback")
+  async handleCallback(@Query() query: any, @Res() res: Response) {
+    const reference: string = query.reference;
+    return this.paystackService.handleCallback(reference, res);
+  }
+
   @Post("webhook/xpay")
   async handleEvent(
     @Body() payload: any,
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    await this.paystackService.handleEvent(payload, req, res);
+    await this.paystackService.handleEvent(payload, req);
     return res.sendStatus(200);
   }
 }
