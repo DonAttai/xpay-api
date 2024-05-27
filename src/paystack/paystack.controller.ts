@@ -30,12 +30,8 @@ export class PaystackController {
   }
 
   @Get("callback")
-  async handleCallback(
-    @Query("reference") reference: string,
-    @Res() res: Response,
-  ) {
-    console.log("reference", reference);
-    return await this.paystackService.handleCallback(reference, res);
+  handleCallback(@Query("reference") reference: string, @Res() res: Response) {
+    this.paystackService.handleCallback(reference, res);
   }
 
   @Post("webhook/xpay")
