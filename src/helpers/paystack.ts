@@ -22,7 +22,7 @@ export class Paystack {
     return res.data;
   }
 
-  async verifyPayment(reference: string) {
+  async verifyTransaction(reference: string) {
     const res = await axios.get(
       `https://api.paystack.co/transaction/verify/:${reference}`,
       this.headers,
