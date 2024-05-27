@@ -8,6 +8,7 @@ import {
   UseGuards,
   Get,
   Query,
+  HttpException,
 } from "@nestjs/common";
 
 import { PaystackService } from "./paystack.service";
@@ -31,11 +32,12 @@ export class PaystackController {
 
   @Get("callback")
   handleCallback(@Query("reference") reference: string, @Res() res: Response) {
-    const transaction = this.paystackService.handleCallback(reference);
     const URL = `https://x-pay.onrender.com/success-page?reference=${reference}`;
+    const transaction = this.paystackService.handleCallback(reference);
     if (transaction) {
       return res.redirect(URL);
     }
+    throw new Error("Transaction Faild!");
   }
 
   @Post("webhook/xpay")

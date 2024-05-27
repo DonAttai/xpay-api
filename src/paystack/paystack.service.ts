@@ -26,13 +26,9 @@ export class PaystackService {
   }
 
   async handleCallback(reference: string) {
-    try {
-      const transaction = await this.paystack.verifyTransaction(reference);
-      if (transaction.status === "success") {
-        return transaction;
-      }
-    } catch (error) {
-      throw new Error(error.message);
+    const transaction = await this.paystack.verifyTransaction(reference);
+    if (transaction.status === "success") {
+      return transaction;
     }
   }
 
