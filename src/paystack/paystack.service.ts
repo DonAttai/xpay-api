@@ -30,7 +30,9 @@ export class PaystackService {
     console.log(transaction);
 
     if (transaction.status === "success") {
-      return res.redirect("https://x-pay.onrender.com/success-page");
+      return res.redirect(
+        `https://x-pay.onrender.com/success-page/reference=${reference}`,
+      );
     }
   }
 
