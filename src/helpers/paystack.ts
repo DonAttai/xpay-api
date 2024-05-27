@@ -7,8 +7,7 @@ export type InitializeTransactionType = {
   callback_url: string;
 };
 export class Paystack {
-  initializePaymentURL = "https://api.paystack.co/transaction/initialize";
-  verifyPaymentURL = "https://api.paystack.co/transaction/verify";
+  API_URL = "https://api.paystack.co";
 
   headers = {
     headers: {
@@ -18,13 +17,17 @@ export class Paystack {
   };
 
   async initializeTransaction(data: InitializeTransactionType) {
-    const res = await axios.post(this.initializePaymentURL, data, this.headers);
+    const res = await axios.post(
+      `${this.API_URL}/transaction/initialize`,
+      data,
+      this.headers,
+    );
     return res.data;
   }
 
   async verifyTransaction(reference: string) {
     const res = await axios.get(
-      `https://api.paystack.co/transaction/verify/:${reference}`,
+      `${this.API_URL}/transaction/verify/${reference}`,
       this.headers,
     );
     return res.data;
