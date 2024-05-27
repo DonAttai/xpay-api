@@ -30,7 +30,7 @@ export class PaystackService {
       const transaction = await this.paystack.verifyTransaction(reference);
       if (transaction.status === "success") {
         return res.redirect(
-          `https://x-pay.onrender.com/success-page/?reference=${reference}`,
+          `https://x-pay.onrender.com/success-page?reference=${reference}`,
         );
       }
     } catch (error) {
