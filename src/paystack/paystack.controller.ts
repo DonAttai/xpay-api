@@ -32,6 +32,7 @@ export class PaystackController {
   @Get("callback")
   async handleCallback(@Query() query: any, @Res() res: Response) {
     const reference: string = query.reference;
+    console.log(reference);
     return await this.paystackService.handleCallback(reference, res);
   }
 
