@@ -27,6 +27,7 @@ export class PaystackService {
 
   async handleCallback(reference: string, res: Response) {
     const transaction = await this.paystack.verifyPayment(reference);
+    console.log(transaction);
 
     if (transaction.status === "success") {
       return res.redirect("https://x-pay.onrender.com/success-page");
