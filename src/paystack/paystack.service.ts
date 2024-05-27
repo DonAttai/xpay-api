@@ -17,7 +17,7 @@ export class PaystackService {
       return await this.paystack.initializeTransaction({
         email,
         amount: amount * 100,
-        callback_url: `${process.env.REMOTE_URL}/api/paystack/callback/`,
+        callback_url: "https://xpay-api.onrender.com/api/paystack/callback/",
       });
     } catch (error) {
       throw new Error(`Paystack error: 
@@ -26,13 +26,17 @@ export class PaystackService {
   }
 
   async handleCallback(reference: string, res: Response) {
-    const transaction = await this.paystack.verifyTransaction(reference);
-    console.log(transaction);
+    try {
+      const transaction = await this.paystack.verifyTransaction(reference);
+      console.log(transaction);
 
-    if (transaction.status === "success") {
-      return res.redirect(
-        `https://x-pay.onrender.com/success-page/reference=${reference}`,
-      );
+      if (transaction.status === "success") {
+        return res.redirect(
+          `https://x-pay.onrender.com/success-page/?reference=${reference}`,
+        );
+      }
+    } catch (error) {
+      throw new Error(error.message);
     }
   }
 

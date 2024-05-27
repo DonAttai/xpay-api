@@ -34,7 +34,7 @@ export class PaystackController {
     @Query("reference") reference: string,
     @Res() res: Response,
   ) {
-    console.log(reference);
+    console.log("reference", reference);
     return await this.paystackService.handleCallback(reference, res);
   }
 
