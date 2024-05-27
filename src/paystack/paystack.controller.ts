@@ -31,7 +31,11 @@ export class PaystackController {
 
   @Get("callback")
   handleCallback(@Query("reference") reference: string, @Res() res: Response) {
-    return this.paystackService.handleCallback(reference, res);
+    const transaction = this.paystackService.handleCallback(reference);
+    const URL = `https://x-pay.onrender.com/success-page?reference=${reference}`;
+    if (transaction) {
+      return res.redirect(URL);
+    }
   }
 
   @Post("webhook/xpay")

@@ -25,13 +25,11 @@ export class PaystackService {
     }
   }
 
-  async handleCallback(reference: string, res: Response) {
+  async handleCallback(reference: string) {
     try {
       const transaction = await this.paystack.verifyTransaction(reference);
       if (transaction.status === "success") {
-        return res.redirect(
-          `https://x-pay.onrender.com/success-page?reference=${reference}`,
-        );
+        return transaction;
       }
     } catch (error) {
       throw new Error(error.message);
