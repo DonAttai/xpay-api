@@ -15,8 +15,8 @@ async function bootstrap() {
   app.enableCors({
     credentials: true,
     origin: [
-      configService.get<string>("CLIENT_URL_LOCAL"),
       configService.get<string>("CLIENT_URL_REMOTE"),
+      configService.get<string>("CLIENT_URL_LOCAL"),
     ],
   });
   app.useGlobalPipes(new ValidationPipe());
