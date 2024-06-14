@@ -28,8 +28,7 @@ export class AuthService {
 
     const comparePassword = await bcrypt.compare(password, user?.password);
 
-    if (!comparePassword) throw new ForbiddenException("Invalid credentials!");
-    if (user && comparePassword) return user;
+    if (user && (await bcrypt.compare(password, user.password))) return user;
     return null;
   }
 
