@@ -1,16 +1,13 @@
 import {
-  Body,
   Controller,
   Get,
   Param,
   ParseIntPipe,
   Post,
-  Request,
   UseGuards,
 } from "@nestjs/common";
-import { CreateWalletDto } from "./dto/create-wallet.dto";
 import { WalletService } from "./wallet.service";
-import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
+import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { ApiTags } from "@nestjs/swagger";
 
 @ApiTags("Wallet")
@@ -28,5 +25,10 @@ export class WalletController {
   @Post(":userId/wallet")
   createWallet(@Param("userId", ParseIntPipe) userId: number) {
     return this.walletService.createWallet(userId);
+  }
+  //  get wallet by user id
+  @Get(":userId/wallet")
+  findWalletByUserId(@Param("userId", ParseIntPipe) userId: number) {
+    return this.walletService.findWalletByUserId(userId);
   }
 }

@@ -9,17 +9,17 @@ import {
   HttpStatus,
   UseGuards,
   ParseIntPipe,
-} from '@nestjs/common';
-import { UsersService } from './users.service';
-import { Role, User } from './entities/user.entity';
-import { Response } from 'express';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { Roles } from 'src/auth/roles.decorator';
-import { RolesGuard } from 'src/auth/roles.guard';
-import { ApiTags } from '@nestjs/swagger';
+} from "@nestjs/common";
+import { UsersService } from "./users.service";
+import { Role, User } from "./entities/user.entity";
+import { Response } from "express";
+import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
+import { Roles } from "src/auth/decorators";
+import { RolesGuard } from "src/auth/guards/roles.guard";
+import { ApiTags } from "@nestjs/swagger";
 
-@ApiTags('User')
-@Controller('users')
+@ApiTags("User")
+@Controller("users")
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -34,16 +34,16 @@ export class UsersController {
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
-  @Get(':id')
+  @Get(":id")
   @UseGuards(JwtAuthGuard)
-  findUserById(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.getUserWithWallet(id);
+  findUserById(@Param("id", ParseIntPipe) id: number) {
+    return this.usersService.findUserById(id);
   }
 
   // delete a user
-  @Delete(':id')
+  @Delete(":id")
   @UseGuards(JwtAuthGuard)
-  removeUser(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+  removeUser(@Param("id", ParseIntPipe) id: number, @Res() res: Response) {
     this.usersService.removeUser(id);
     return res.status(HttpStatus.NO_CONTENT).json({});
   }

@@ -9,12 +9,12 @@ import {
 } from "@nestjs/common";
 import { CreateTransactionDto } from "./dto";
 import { TransactionsService } from "./transactions.service";
-import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
+import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { ApiTags } from "@nestjs/swagger";
-import { RolesGuard } from "src/auth/roles.guard";
-import { Roles } from "src/auth/roles.decorator";
+import { RolesGuard } from "src/auth/guards/roles.guard";
+import { Roles } from "src/auth/decorators";
 import { Role } from "src/users/entities/user.entity";
-import { UserGuard } from "src/guards/user.guard";
+import { UserGuard } from "src/users/guards/user.guard";
 
 @ApiTags("Transaction")
 @Controller()

@@ -13,7 +13,7 @@ import {
 
 import { PaystackService } from "./paystack.service";
 import { Request, Response } from "express";
-import { JwtAuthGuard } from "src/auth/jwt-auth.guard";
+import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { ApiTags } from "@nestjs/swagger";
 
 @ApiTags("Paystack")

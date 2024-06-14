@@ -42,7 +42,9 @@ export class PaystackService {
         const { data, event } = payload;
         if (event === "charge.success") {
           const { amount, customer } = data;
-          const user = await this.userService.findUser(customer.email);
+          const user = await this.userService.findUserWithWalletByEmail(
+            customer.email,
+          );
           return await this.walletService.fundWallet(user.wallet.id, amount);
         }
       }
