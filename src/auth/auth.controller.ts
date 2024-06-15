@@ -59,6 +59,7 @@ export class AuthController {
       if (error instanceof ConflictException) {
         throw new BadRequestException("Email already in use ");
       }
+      // delete user
       await this.usersService.deleteUserByEmail(body.email);
       throw new InternalServerErrorException("User registration failed");
     }
