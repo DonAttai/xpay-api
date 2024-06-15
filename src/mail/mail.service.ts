@@ -23,13 +23,12 @@ export class MailService {
 
   async sendTransactionalEmail(user: User, subject: string, html: string) {
     try {
-      const info = await this.transporter.sendMail({
+      await this.transporter.sendMail({
         from: '"xpay" <no-reply@xpay.com>',
         to: user.email,
         subject,
         html,
       });
-      console.log("Email sent:", info.response);
     } catch (error) {
       throw error;
     }
