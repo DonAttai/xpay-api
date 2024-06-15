@@ -44,7 +44,7 @@ export class UsersController {
   @Delete(":id")
   @UseGuards(JwtAuthGuard)
   removeUser(@Param("id", ParseIntPipe) id: number, @Res() res: Response) {
-    this.usersService.removeUser(id);
+    this.usersService.deleteUserById(id);
     return res.status(HttpStatus.NO_CONTENT).json({});
   }
 }
