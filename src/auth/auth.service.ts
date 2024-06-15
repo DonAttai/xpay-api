@@ -1,11 +1,10 @@
 import {
   ForbiddenException,
   HttpException,
-  HttpStatus,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { JsonWebTokenError, JwtService } from "@nestjs/jwt";
+import { JwtService } from "@nestjs/jwt";
 import { UsersService } from "src/users/users.service";
 import * as bcrypt from "bcrypt";
 import { User } from "src/users/entities/user.entity";
@@ -26,19 +25,17 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userService.findUserByEmail(email);
 
-    const comparePassword = await bcrypt.compare(password, user?.password);
-
     if (user && (await bcrypt.compare(password, user.password))) return user;
     return null;
   }
 
   async login(user: Partial<User>) {
     const payload = { sub: user.id, email: user.email, roles: user.roles };
-    return {
-      user,
-      accessToken: this.jwtService.sign(payload),
-      refreshToken: this.generateRefreshToken(user.id),
-    };
+    const accessToken = this.jwtService.sign(payload);
+    const refreshToken = this.generateRefreshToken(user.id);
+    const { password, ...rest } = user;
+    const userData = { ...rest, accessToken };
+    return { userData, refreshToken };
   }
 
   async refreshToken(token: string) {

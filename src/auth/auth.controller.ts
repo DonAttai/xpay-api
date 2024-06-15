@@ -42,14 +42,10 @@ export class AuthController {
     @Req() req: RequestObject,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken, user } = await this.authService.login(
-      req.user,
-    );
+    const { userData, refreshToken } = await this.authService.login(req.user);
     this.authService.setRefreshTokenCookie(refreshToken, res);
 
-    const { password, ...rest } = user;
-
-    return { ...rest, accessToken };
+    return userData;
   }
 
   // create user
@@ -78,10 +74,10 @@ export class AuthController {
     if (!refreshToken) {
       throw new ForbiddenException();
     }
-    const { accessToken, refreshToken: newRefreshToken } =
+    const { userData, refreshToken: newRefreshToken } =
       await this.authService.refreshToken(refreshToken);
     this.authService.setRefreshTokenCookie(newRefreshToken, res);
-    return { accessToken };
+    return { accessToken: userData.accessToken };
   }
 
   // forgot password
