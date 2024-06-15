@@ -1,6 +1,10 @@
 import { Strategy } from "passport-local";
 import { PassportStrategy } from "@nestjs/passport";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { AuthService } from "../auth.service";
 
 @Injectable()
@@ -13,7 +17,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     const user = this.authService.validateUser(email, password);
 
     if (!user) {
-      throw new NotFoundException("User not found!");
+      throw new ForbiddenException("Invalid credential!");
     }
     return user;
   }

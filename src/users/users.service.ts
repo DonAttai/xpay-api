@@ -89,16 +89,25 @@ export class UsersService {
   }
 
   // Remove a user
-  async removeUser(id: number): Promise<void> {
+  async deleteUserById(id: number): Promise<void> {
     const user = await this.usersRepository.findOneBy({ id });
 
     if (!user) {
-      throw new NotFoundException("User does not exist!");
+      throw new NotFoundException("User not found!");
     }
 
-    await this.usersRepository.delete(id);
+    await this.usersRepository.delete(user.id);
   }
 
+  async deleteUserByEmail(email: string) {
+    const user = await this.usersRepository.findOneBy({ email });
+    if (!user) {
+      throw new NotFoundException("user not found");
+    }
+    await this.usersRepository.delete(user.email);
+  }
+
+  // save user
   async saveUser(user: User) {
     return await this.usersRepository.save(user);
   }

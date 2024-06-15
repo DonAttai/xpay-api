@@ -52,15 +52,15 @@ export class AuthController {
   @Post("register")
   @UseInterceptors(ClassSerializerInterceptor)
   @HttpCode(201)
-  async signUp(@Body() createUserDto: CreateUserDto) {
+  async signUp(@Body() body: CreateUserDto) {
     try {
-      return await this.usersService.signUp(createUserDto);
+      return await this.usersService.signUp(body);
     } catch (error) {
       if (error instanceof ConflictException) {
         throw new BadRequestException("Email already in use ");
-      } else {
-        throw new InternalServerErrorException();
       }
+      await this.usersService.deleteUserByEmail(body.email);
+      throw new InternalServerErrorException("User registration failed");
     }
   }
 
@@ -74,10 +74,9 @@ export class AuthController {
     if (!refreshToken) {
       throw new ForbiddenException();
     }
-    const { userData, refreshToken: newRefreshToken } =
-      await this.authService.refreshToken(refreshToken);
-    this.authService.setRefreshTokenCookie(newRefreshToken, res);
-    return { accessToken: userData.accessToken };
+    const result = await this.authService.refreshToken(refreshToken);
+    this.authService.setRefreshTokenCookie(result.refreshToken, res);
+    return { accessToken: result.userData.accessToken };
   }
 
   // forgot password
