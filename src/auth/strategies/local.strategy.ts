@@ -17,7 +17,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     const user = this.authService.validateUser(email, password);
 
     if (!user) {
-      throw new ForbiddenException("Invalid credential!");
+      throw new NotFoundException("Invalid credential!");
     }
     return user;
   }
