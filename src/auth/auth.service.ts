@@ -3,8 +3,9 @@ import {
   HttpException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
+import { JwtService, TokenExpiredError } from "@nestjs/jwt";
 import { UsersService } from "src/users/users.service";
 import * as bcrypt from "bcrypt";
 import { User } from "src/users/entities/user.entity";
@@ -24,29 +25,24 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.userService.findUserByEmail(email);
-
     if (user && (await bcrypt.compare(password, user.password))) return user;
     return null;
   }
 
-  async login(user: Partial<User>) {
+  async login(user: User) {
     const payload = { sub: user.id, email: user.email, roles: user.roles };
     const accessToken = this.jwtService.sign(payload);
-    const refreshToken = this.generateRefreshToken(user.id);
+    const refreshToken = this.jwtService.sign(
+      { sub: user.id },
+      { secret: process.env.REFRESH_JWT_SECRET, expiresIn: "7d" },
+    );
     const { password, ...rest } = user;
     const userData = { ...rest, accessToken };
     return { userData, refreshToken };
   }
 
-  async refreshToken(token: string) {
-    const payload = await this.jwtService.verify(token, {
-      secret: this.configService.get<string>("REFRESH_JWT_SECRET"),
-    });
-    const user = await this.userService.findUserById(payload.sub);
-
-    if (!user) {
-      throw new ForbiddenException("Invalid token");
-    }
+  // refresh access token
+  async refreshAccessToken(user: User) {
     return this.login(user);
   }
 
@@ -145,15 +141,6 @@ export class AuthService {
     await this.userService.saveUser(user);
 
     return { message: "You have successfully changed your password!" };
-  }
-
-  // generate referesh token
-  generateRefreshToken(userId: number) {
-    const payload = { sub: userId };
-    return this.jwtService.sign(payload, {
-      secret: this.configService.get<string>("REFRESH_JWT_SECRET"),
-      expiresIn: "7d",
-    });
   }
 
   // set refresh token cookie

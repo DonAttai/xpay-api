@@ -9,6 +9,7 @@ import {
   HttpStatus,
   UseGuards,
   ParseIntPipe,
+  Req,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { Role, User } from "./entities/user.entity";
@@ -36,7 +37,7 @@ export class UsersController {
   @UseInterceptors(ClassSerializerInterceptor)
   @Get(":id")
   @UseGuards(JwtAuthGuard)
-  findUserById(@Param("id", ParseIntPipe) id: number) {
+  findUserById(@Param("id", ParseIntPipe) id: number, @Req() req: any) {
     return this.usersService.findUserById(id);
   }
 

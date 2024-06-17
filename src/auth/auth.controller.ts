@@ -11,6 +11,7 @@ import {
   Post,
   Req,
   Res,
+  UnauthorizedException,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
@@ -24,6 +25,7 @@ import { Request, Response } from "express";
 import { SignInDto } from "./dto/signin-user.dto";
 import { RequestObject } from "src/types/express";
 import { ChangePasswordDto } from "./dto/change-password.dto";
+import { RefreshTokenAuthGuard } from "./guards";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -44,13 +46,11 @@ export class AuthController {
   ) {
     const { userData, refreshToken } = await this.authService.login(req.user);
     this.authService.setRefreshTokenCookie(refreshToken, res);
-
     return userData;
   }
 
   // create user
   @Post("register")
-  @UseInterceptors(ClassSerializerInterceptor)
   @HttpCode(201)
   async signUp(@Body() body: CreateUserDto) {
     try {
@@ -67,17 +67,10 @@ export class AuthController {
 
   // refresh token
   @Post("refresh")
-  async refreshToken(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const refreshToken = req.signedCookies["refreshToken"];
-    if (!refreshToken) {
-      throw new ForbiddenException();
-    }
-    const result = await this.authService.refreshToken(refreshToken);
-    this.authService.setRefreshTokenCookie(result.refreshToken, res);
-    return { accessToken: result.userData.accessToken };
+  @UseGuards(RefreshTokenAuthGuard)
+  async refreshAccessToken(@Req() req: RequestObject) {
+    const { userData } = await this.authService.refreshAccessToken(req.user);
+    return { accessToken: userData.accessToken };
   }
 
   // forgot password
@@ -114,5 +107,15 @@ export class AuthController {
       ...changePasswordDto,
       userId: req.user.id,
     });
+  }
+
+  @Post("logout")
+  async logout(@Res() res: Response) {
+    res.cookie("refreshToken", "", {
+      expires: new Date(0),
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+    res.status(200).json({ message: "Logged out successfully" });
   }
 }
