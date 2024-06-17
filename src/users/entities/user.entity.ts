@@ -49,11 +49,13 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(() => Transaction, (transaction) => transaction.user)
+  @OneToMany(() => Transaction, (transaction) => transaction.user, {
+    cascade: ["remove"],
+  })
   transactions: Transaction[];
 
   @OneToOne(() => Wallet, (Wallet) => Wallet.user, {
-    onDelete: "CASCADE",
+    cascade: ["remove"],
   })
   @JoinColumn({ name: "wallet_id" })
   wallet: Wallet;
