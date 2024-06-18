@@ -103,6 +103,7 @@ export class AuthService {
       }
 
       const token = this.userService.generateToken(user);
+      // host name
       const HOSTNAME = this.userService.getHostName();
       const html = `<p>Hello, ${user.firstName.toUpperCase()}, click on the link below to reset your password: ${HOSTNAME}/reset-password?token=${token}&id=${
         user.id
