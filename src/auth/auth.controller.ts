@@ -5,13 +5,11 @@ import {
   ConflictException,
   Controller,
   ForbiddenException,
-  Get,
   HttpCode,
   InternalServerErrorException,
   Post,
   Req,
   Res,
-  UnauthorizedException,
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
@@ -21,11 +19,12 @@ import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { UsersService } from "src/users/users.service";
 import { CreateUserDto } from "src/users/dto/create-user.dto";
 import { ApiTags } from "@nestjs/swagger";
-import { Request, Response } from "express";
+import { Response } from "express";
 import { SignInDto } from "./dto/signin-user.dto";
 import { RequestObject } from "src/types/express";
 import { ChangePasswordDto } from "./dto/change-password.dto";
-import { RefreshTokenAuthGuard } from "./guards";
+import { RefreshJwtAuthGuard } from "./guards";
+import { User } from "src/users/entities/user.entity";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -36,6 +35,7 @@ export class AuthController {
   ) {}
 
   // login
+  @UseInterceptors(ClassSerializerInterceptor)
   @Post("login")
   @UseGuards(LocalAuthGuard)
   @HttpCode(200)
@@ -44,9 +44,13 @@ export class AuthController {
     @Req() req: RequestObject,
     @Res({ passthrough: true }) res: Response,
   ) {
+    if (!req.user.isVerified || !req.user.isActive) {
+      throw new ForbiddenException("User not verified or deactivated");
+    }
+
     const { userData, refreshToken } = await this.authService.login(req.user);
     this.authService.setRefreshTokenCookie(refreshToken, res);
-    return userData;
+    return new User(userData);
   }
 
   // create user
@@ -67,7 +71,7 @@ export class AuthController {
 
   // refresh token
   @Post("refresh")
-  @UseGuards(RefreshTokenAuthGuard)
+  @UseGuards(RefreshJwtAuthGuard)
   async refreshAccessToken(@Req() req: RequestObject) {
     const { userData } = await this.authService.refreshAccessToken(req.user);
     return { accessToken: userData.accessToken };

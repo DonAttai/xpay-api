@@ -36,8 +36,8 @@ export class AuthService {
       { sub: user.id },
       { secret: process.env.REFRESH_JWT_SECRET, expiresIn: "7d" },
     );
-    const { password, ...rest } = user;
-    const userData = { ...rest, accessToken };
+    // const { password, ...rest } = user;
+    const userData = { ...user, accessToken };
     return { userData, refreshToken };
   }
 

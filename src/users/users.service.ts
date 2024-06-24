@@ -13,6 +13,7 @@ import * as bcrypt from "bcrypt";
 import { MailService } from "src/mail/mail.service";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
+import { UpdateUserDto } from "./dto/update-user.dto";
 
 @Injectable()
 export class UsersService {
@@ -76,7 +77,7 @@ export class UsersService {
 
     const html = `<p>Hello, ${user.firstName.toUpperCase()}, click on the link below to verify your email: ${HOSTNAME}/verify-email?token=${token}&id=${
       newUser.id
-    }
+    }. If the link is not clickable, copy it and paste it on your browser.
       </p>`;
 
     await this.mailService.sendTransactionalEmail(
@@ -86,6 +87,18 @@ export class UsersService {
     );
 
     return { message: "X-Pay account was successfully created! " };
+  }
+
+  // update user
+  async updateUser(id: number, data: UpdateUserDto) {
+    let user = await this.usersRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    user = { ...user, ...data };
+    await this.usersRepository.save(user);
+    return user;
   }
 
   // Remove a user
@@ -104,7 +117,13 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException("user not found");
     }
-    await this.usersRepository.delete(user.email);
+
+    try {
+      const { email } = user;
+      await this.usersRepository.delete({ email });
+    } catch (error) {
+      throw new InternalServerErrorException();
+    }
   }
 
   // save user

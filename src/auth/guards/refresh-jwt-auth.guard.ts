@@ -6,7 +6,7 @@ import {
 import { AuthGuard } from "@nestjs/passport";
 
 @Injectable()
-export class RefreshTokenAuthGuard extends AuthGuard("jwt-refresh") {
+export class RefreshJwtAuthGuard extends AuthGuard("jwt-refresh") {
   handleRequest(err: any, user: any, info: any) {
     if (err || !user) {
       // Handle errors here (e.g., throw custom exceptions)

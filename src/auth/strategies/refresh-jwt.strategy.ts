@@ -6,7 +6,7 @@ import { Request } from "express";
 import { UsersService } from "src/users/users.service";
 
 @Injectable()
-export class RefreshTokenStrategy extends PassportStrategy(
+export class RefreshJwtStrategy extends PassportStrategy(
   Strategy,
   "jwt-refresh",
 ) {

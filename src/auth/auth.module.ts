@@ -1,10 +1,10 @@
 import { Module } from "@nestjs/common";
-import { JwtModule } from "@nestjs/jwt";
+import { JwtModule, JwtService } from "@nestjs/jwt";
 import { AuthService } from "./auth.service";
 import { AuthController } from "./auth.controller";
 import { UsersModule } from "src/users/users.module";
 import { PassportModule } from "@nestjs/passport";
-import { LocalStrategy, JwtStrategy, RefreshTokenStrategy } from "./strategies";
+import { LocalStrategy, JwtStrategy, RefreshJwtStrategy } from "./strategies";
 import { ConfigService } from "@nestjs/config";
 import { RolesGuard } from "./guards";
 import { MailModule } from "src/mail/mail.module";
@@ -27,7 +27,8 @@ import { MailModule } from "src/mail/mail.module";
     LocalStrategy,
     JwtStrategy,
     RolesGuard,
-    RefreshTokenStrategy,
+    RefreshJwtStrategy,
+    // JwtService,  added because of the custom guards
   ],
   controllers: [AuthController],
 })
