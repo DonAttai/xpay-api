@@ -38,22 +38,18 @@ export class WalletService {
   async findWalletById(walletId: string) {
     const wallet = await this.walletRepository.findOneBy({ id: walletId });
     if (!wallet) {
-      throw new NotFoundException(`Wallet with id: ${walletId} not found!`);
+      throw new NotFoundException(`Invalid walletId`);
     }
     return wallet;
   }
 
   // find wallet by user id
   async findWalletByUserId(userId: number) {
-    try {
-      const user = await this.userService.getUserWithWallet(userId);
-      if (!user) {
-        throw new NotFoundException();
-      }
-      return this.findWalletById(user.wallet.id);
-    } catch (error) {
-      throw error;
+    const user = await this.userService.getUserWithWallet(userId);
+    if (!user) {
+      throw new NotFoundException();
     }
+    return this.findWalletById(user.wallet.id);
   }
 
   async creditBeneficiaryWallet(walletId: string, amount: number) {
@@ -69,18 +65,10 @@ export class WalletService {
   }
 
   async getWalletWithUser(walletId: string) {
-    try {
-      const wallet = await this.walletRepository.findOne({
-        where: { id: walletId },
-        relations: ["user"],
-      });
-      if (!wallet) {
-        throw new NotFoundException("Wallet not found");
-      }
-      return wallet;
-    } catch (error) {
-      throw error;
-    }
+    return await this.walletRepository.findOne({
+      where: { id: walletId },
+      relations: ["user"],
+    });
   }
 
   async fundWallet(walletId: string, amount: number) {

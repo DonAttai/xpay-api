@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Post,
@@ -18,7 +19,12 @@ export class WalletController {
 
   @Get("wallets/:walletId")
   getWalletWithUser(@Param("walletId") walletId: string) {
-    return this.walletService.getWalletWithUser(walletId);
+    try {
+      return this.walletService.getWalletWithUser(walletId);
+    } catch (error) {
+      console.log(error.message);
+      throw new NotFoundException("wallet not found");
+    }
   }
 
   // create wallet

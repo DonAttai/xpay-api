@@ -45,7 +45,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     if (!req.user.isVerified || !req.user.isActive) {
-      throw new ForbiddenException("User not verified or deactivated");
+      throw new ForbiddenException("User deactivated or not verified");
     }
 
     const { userData, refreshToken } = await this.authService.login(req.user);
