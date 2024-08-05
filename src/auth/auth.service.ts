@@ -36,9 +36,7 @@ export class AuthService {
       { sub: user.id },
       { secret: process.env.REFRESH_JWT_SECRET, expiresIn: "7d" },
     );
-    // const { password, ...rest } = user;
-    const userData = { ...user, accessToken };
-    return { userData, refreshToken };
+    return { ...user, accessToken, refreshToken };
   }
 
   // refresh access token
@@ -147,11 +145,11 @@ export class AuthService {
   // set refresh token cookie
   setRefreshTokenCookie(refreshToken: string, res: Response) {
     res.cookie("refreshToken", refreshToken, {
-      httpOnly: true, // Prevent client-side JavaScript access
+      httpOnly: true,
       signed: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict", // Mitigate CSRF attacks
-      maxAge: 7 * 24 * 60 * 60 * 1000, // Set cookie to expire in 7 days (matches refresh token expiration)
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
   }
 }

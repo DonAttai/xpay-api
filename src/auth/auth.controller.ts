@@ -48,7 +48,9 @@ export class AuthController {
       throw new ForbiddenException("User deactivated or not verified");
     }
 
-    const { userData, refreshToken } = await this.authService.login(req.user);
+    const { refreshToken, ...userData } = await this.authService.login(
+      req.user,
+    );
     this.authService.setRefreshTokenCookie(refreshToken, res);
     return new User(userData);
   }
@@ -73,8 +75,8 @@ export class AuthController {
   @Post("refresh")
   @UseGuards(RefreshJwtAuthGuard)
   async refreshAccessToken(@Req() req: RequestObject) {
-    const { userData } = await this.authService.refreshAccessToken(req.user);
-    return { accessToken: userData.accessToken };
+    const { accessToken } = await this.authService.refreshAccessToken(req.user);
+    return { accessToken };
   }
 
   // forgot password

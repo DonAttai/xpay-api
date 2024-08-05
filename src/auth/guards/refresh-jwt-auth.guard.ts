@@ -7,14 +7,13 @@ import { AuthGuard } from "@nestjs/passport";
 
 @Injectable()
 export class RefreshJwtAuthGuard extends AuthGuard("jwt-refresh") {
-  handleRequest(err: any, user: any, info: any) {
-    if (err || !user) {
-      // Handle errors here (e.g., throw custom exceptions)
-      if (info?.message) {
-        throw new ForbiddenException(info.message);
-      }
-      throw new UnauthorizedException("Unauthorized");
+  handleRequest(err: any, user: any, info: any, context: any, status: any) {
+    if (info instanceof Error) {
+      throw new ForbiddenException("expired_refresh_token");
     }
-    return user; // Pass the authenticated user to the route handler
+
+    console.log("outside");
+
+    return super.handleRequest(err, user, info, context, status);
   }
 }
