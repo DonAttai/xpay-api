@@ -3,7 +3,6 @@ import {
   HttpException,
   Injectable,
   NotFoundException,
-  UnauthorizedException,
 } from "@nestjs/common";
 import { JwtService, TokenExpiredError } from "@nestjs/jwt";
 import { UsersService } from "src/users/users.service";
