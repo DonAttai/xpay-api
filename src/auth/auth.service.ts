@@ -149,6 +149,8 @@ export class AuthService {
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict", // Mitigate CSRF attacks
       maxAge: 7 * 24 * 60 * 60 * 1000,
+
+      // maxAge: 60 * 1000,
     });
   }
 }
