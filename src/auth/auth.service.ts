@@ -150,7 +150,7 @@ export class AuthService {
       sameSite: "strict", // Mitigate CSRF attacks
       maxAge: 7 * 24 * 60 * 60 * 1000,
 
-      // maxAge: 60 * 1000,
+      // maxAge: 5 * 60 * 1000,
     });
   }
 }
